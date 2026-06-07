@@ -202,7 +202,7 @@ export default function GettingStartedPage() {
           'vip_monthly_price',
           'vip_regular_price',
           'founding_member_enabled',
-          'founding_member_end_date',
+          'founding_member_deadline',
           'founding_member_limit'
         ])
 
@@ -213,7 +213,7 @@ export default function GettingStartedPage() {
 
       // Check if founding member period is active
       const isEnabled = settingsMap.founding_member_enabled === 'true'
-      const deadline = settingsMap.founding_member_end_date
+      const deadline = settingsMap.founding_member_deadline
       
       // Parse deadline - handle various date formats from database
       let isBeforeDeadline = false
@@ -256,7 +256,7 @@ export default function GettingStartedPage() {
         premium_regular_price: settingsMap.premium_regular_price,
         vip_regular_price: settingsMap.vip_regular_price,
         founding_member_enabled: settingsMap.founding_member_enabled,
-        founding_member_end_date: settingsMap.founding_member_end_date,
+        founding_member_deadline: settingsMap.founding_member_deadline,
         isEnabled,
         isBeforeDeadline,
         hasSpotsRemaining,
