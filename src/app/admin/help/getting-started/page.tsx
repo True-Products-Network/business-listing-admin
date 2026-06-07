@@ -17,10 +17,12 @@ import {
   ArrowLeft,
   Star,
   Zap,
-  Crown
+  Crown,
+  BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase'
 
 interface ChecklistItem {
   id: string
@@ -32,6 +34,15 @@ interface ChecklistItem {
     label: string
     href: string
   }
+}
+
+interface PricingData {
+  premiumPrice: number
+  vipPrice: number
+  isFoundingMemberActive: boolean
+  foundingMemberDeadline: string
+  foundingMemberLimit: number
+  foundingMemberCurrent: number
 }
 
 const checklistItems: ChecklistItem[] = [
@@ -134,15 +145,22 @@ const checklistItems: ChecklistItem[] = [
   {
     id: 'consider-upgrade',
     title: 'Consider Upgrading',
-    description: 'Premium and VIP plans get priority placement, more photos, coupons, and better visibility.',
+    description: 'Premium and VIP plans get priority placement, more photos, and better visibility.',
     phase: 4,
     icon: <CreditCard className="h-5 w-5" />,
-    action: { label: 'View Plans', href: '/admin/help/plans' }
+    action: { label: 'View Plans', href: '/admin/help/getting-started' }
+  },
+  {
+    id: 'view-analytics',
+    title: 'View Your Analytics (Premium/VIP)',
+    description: 'Track profile views, website clicks, phone calls, and coupon redemptions.',
+    phase: 4,
+    icon: <BarChart3 className="h-5 w-5" />
   },
   {
     id: 'create-coupon',
-    title: 'Create a Coupon (Premium/VIP)',
-    description: 'Attract new customers with a special offer or discount.',
+    title: 'Create a Coupon (VIP Only)',
+    description: 'Attract new customers with special offers and discounts. VIP members only.',
     phase: 4,
     icon: <Tag className="h-5 w-5" />
   }
@@ -157,6 +175,79 @@ const phases = [
 
 export default function GettingStartedPage() {
   const [completedItems, setCompletedItems] = useState<string[]>([])
+  const [pricing, setPricing] = useState<PricingData>({
+    premiumPrice: 97,
+    vipPrice: 297,
+    isFoundingMemberActive: false,
+    foundingMemberDeadline: '',
+    foundingMemberLimit: 100,
+    foundingMemberCurrent: 0
+  })
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  useEffect(() => {
+    fetchPricingData()
+  }, [])
+
+  const fetchPricingData = async () => {
+    try {
+      // Fetch system settings for pricing
+      const { data: settings } = await supabase
+        .from('system_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', [
+          'premium_monthly_price',
+          'premium_regular_price',
+          'vip_monthly_price',
+          'vip_regular_price',
+          'founding_member_enabled',
+          'founding_member_deadline',
+          'founding_member_limit'
+        ])
+
+      const settingsMap = settings?.reduce((acc: any, s: any) => {
+        acc[s.setting_key] = s.setting_value
+        return acc
+      }, {}) || {}
+
+      // Check if founding member period is active
+      const isEnabled = settingsMap.founding_member_enabled === 'true'
+      const deadline = settingsMap.founding_member_deadline
+      const now = new Date()
+      const deadlineDate = deadline ? new Date(deadline) : null
+      const isBeforeDeadline = deadlineDate ? now < deadlineDate : false
+
+      // Count current founding members
+      const { count: foundingCount } = await supabase
+        .from('subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_founding_member', true)
+        .in('status', ['active', 'past_due', 'trialing'])
+
+      const limit = parseInt(settingsMap.founding_member_limit || '100')
+      const currentCount = foundingCount || 0
+      const hasSpotsRemaining = currentCount < limit
+
+      const isFoundingActive = isEnabled && isBeforeDeadline && hasSpotsRemaining
+
+      setPricing({
+        premiumPrice: isFoundingActive 
+          ? parseInt(settingsMap.premium_monthly_price || '29')
+          : parseInt(settingsMap.premium_regular_price || '97'),
+        vipPrice: isFoundingActive
+          ? parseInt(settingsMap.vip_monthly_price || '97')
+          : parseInt(settingsMap.vip_regular_price || '497'),
+        isFoundingMemberActive: isFoundingActive,
+        foundingMemberDeadline: deadline || '',
+        foundingMemberLimit: limit,
+        foundingMemberCurrent: currentCount
+      })
+    } catch (error) {
+      console.error('Error fetching pricing:', error)
+    }
+    setLoading(false)
+  }
 
   const toggleItem = (id: string) => {
     setCompletedItems(prev =>
@@ -167,6 +258,8 @@ export default function GettingStartedPage() {
   }
 
   const progress = Math.round((completedItems.length / checklistItems.length) * 100)
+
+  const remainingSpots = pricing.foundingMemberLimit - pricing.foundingMemberCurrent
 
   return (
     <div className="space-y-6">
@@ -202,6 +295,27 @@ export default function GettingStartedPage() {
         </CardContent>
       </Card>
 
+      {/* Founding Member Banner */}
+      {pricing.isFoundingMemberActive && (
+        <Card className="border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-amber-500 text-white p-2 rounded-full">
+                <Star className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-amber-900">Founding Member Special</h3>
+                <p className="text-sm text-amber-800">
+                  Lock in these rates forever! Only {remainingSpots} spots remaining. 
+                  Offer ends {new Date(pricing.foundingMemberDeadline).toLocaleDateString()}.
+                </p>
+              </div>
+              <Badge className="bg-amber-500 text-white">Limited Time</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Plan Comparison */}
       <Card className="border-2 border-slate-200">
         <CardHeader>
@@ -209,6 +323,7 @@ export default function GettingStartedPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Free Plan */}
             <div className="border-2 border-slate-200 p-4 rounded-lg text-center">
               <Star className="h-8 w-8 text-slate-400 mx-auto mb-2" />
               <h3 className="font-semibold">Free</h3>
@@ -218,32 +333,86 @@ export default function GettingStartedPage() {
                 <li>• 1 photo</li>
                 <li>• Basic listing</li>
                 <li>• Standard placement</li>
+                <li>• Basic contact info</li>
               </ul>
             </div>
+
+            {/* Premium Plan */}
             <div className="border-2 border-blue-300 p-4 rounded-lg text-center bg-blue-50">
               <Zap className="h-8 w-8 text-blue-500 mx-auto mb-2" />
               <h3 className="font-semibold text-blue-900">Premium</h3>
-              <p className="text-2xl font-bold text-blue-900">$97</p>
-              <p className="text-sm text-blue-700">/month</p>
+              <div className="flex items-baseline justify-center gap-1">
+                <p className="text-2xl font-bold text-blue-900">${pricing.premiumPrice}</p>
+                <p className="text-sm text-blue-700">/month</p>
+              </div>
+              {pricing.isFoundingMemberActive && (
+                <p className="text-xs text-blue-600 line-through">Regular: $97/month</p>
+              )}
               <ul className="text-sm text-blue-800 mt-4 space-y-1 text-left">
                 <li>• 5 photos</li>
                 <li>• Priority placement</li>
-                <li>• Coupons</li>
-                <li>• Social links</li>
+                <li>• Social media links</li>
+                <li>• Analytics dashboard</li>
+                <li>• "Premium" badge</li>
               </ul>
             </div>
+
+            {/* VIP Plan */}
             <div className="border-2 border-purple-300 p-4 rounded-lg text-center bg-purple-50">
               <Crown className="h-8 w-8 text-purple-500 mx-auto mb-2" />
               <h3 className="font-semibold text-purple-900">VIP</h3>
-              <p className="text-2xl font-bold text-purple-900">$297</p>
-              <p className="text-sm text-purple-700">/month</p>
+              <div className="flex items-baseline justify-center gap-1">
+                <p className="text-2xl font-bold text-purple-900">${pricing.vipPrice}</p>
+                <p className="text-sm text-purple-700">/month</p>
+              </div>
+              {pricing.isFoundingMemberActive && (
+                <p className="text-xs text-purple-600 line-through">Regular: $497/month</p>
+              )}
               <ul className="text-sm text-purple-800 mt-4 space-y-1 text-left">
                 <li>• 10 photos</li>
                 <li>• Top placement</li>
                 <li>• Video embed</li>
+                <li>• Analytics dashboard</li>
+                <li>• Coupons & offers</li>
                 <li>• Homepage feature</li>
                 <li>• Banner ads</li>
+                <li>• "VIP" badge</li>
               </ul>
+            </div>
+          </div>
+
+          {/* Feature Legend */}
+          <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2">Feature Availability</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-blue-700">Premium includes:</span>
+                <ul className="text-slate-600 mt-1 space-y-1">
+                  <li>• Analytics dashboard</li>
+                  <li>• Priority search placement</li>
+                  <li>• Social media links</li>
+                  <li>• Up to 5 photos</li>
+                </ul>
+              </div>
+              <div>
+                <span className="font-medium text-purple-700">VIP includes everything in Premium, plus:</span>
+                <ul className="text-slate-600 mt-1 space-y-1">
+                  <li>• Coupons & special offers</li>
+                  <li>• Video embed</li>
+                  <li>• Homepage featuring</li>
+                  <li>• Banner advertising</li>
+                  <li>• Up to 10 photos</li>
+                </ul>
+              </div>
+              <div>
+                <span className="font-medium text-slate-700">All paid plans include:</span>
+                <ul className="text-slate-600 mt-1 space-y-1">
+                  <li>• Enhanced analytics</li>
+                  <li>• Priority support</li>
+                  <li>• Custom CTA buttons</li>
+                  <li>• Advanced listing options</li>
+                </ul>
+              </div>
             </div>
           </div>
         </CardContent>

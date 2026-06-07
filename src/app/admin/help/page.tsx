@@ -90,7 +90,7 @@ const helpCategories = [
       {
         id: 'plan-differences',
         title: 'What are the differences between plans?',
-        content: 'Free: Basic info, 1 photo, standard placement. Premium ($97/month): 5 photos, priority placement, social links, coupons. VIP ($297/month): 10 photos, top placement, video, banner ads, homepage feature.'
+        content: 'Free: Basic info, 1 photo, standard placement. Premium: 5 photos, priority placement, social links, analytics. VIP: Everything in Premium plus 10 photos, top placement, video, coupons, banner ads, homepage feature. Pricing varies based on Founding Member status.'
       },
       {
         id: 'how-to-upgrade',
@@ -117,12 +117,12 @@ const helpCategories = [
       {
         id: 'who-can-create-coupons',
         title: 'Who can create coupons?',
-        content: 'Premium and VIP members can create unlimited coupons. Free listings cannot offer coupons. Upgrade to unlock this feature.'
+        content: 'VIP members can create unlimited coupons. Premium and Free listings cannot offer coupons. Upgrade to VIP to unlock this feature.'
       },
       {
         id: 'create-coupon',
         title: 'How do I create a coupon?',
-        content: 'Log in, click Coupons, click New Coupon, enter title and description, set discount, set expiration date (30-90 days recommended), set usage limits, and create. Coupon appears immediately.'
+        content: 'VIP members: Log in, click Coupons, click New Coupon, enter title and description, set discount, set expiration date (30-90 days recommended), set usage limits, and create. Coupon appears immediately on your listing.'
       },
       {
         id: 'how-customers-redeem',
