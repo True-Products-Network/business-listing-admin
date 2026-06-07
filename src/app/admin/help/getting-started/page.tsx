@@ -176,9 +176,9 @@ const phases = [
 export default function GettingStartedPage() {
   const [completedItems, setCompletedItems] = useState<string[]>([])
   const [pricing, setPricing] = useState<PricingData>({
-    premiumPrice: 97,
-    vipPrice: 297,
-    isFoundingMemberActive: false,
+    premiumPrice: 29,
+    vipPrice: 97,
+    isFoundingMemberActive: true,
     foundingMemberDeadline: '',
     foundingMemberLimit: 100,
     foundingMemberCurrent: 0
@@ -214,9 +214,21 @@ export default function GettingStartedPage() {
       // Check if founding member period is active
       const isEnabled = settingsMap.founding_member_enabled === 'true'
       const deadline = settingsMap.founding_member_deadline
-      const now = new Date()
-      const deadlineDate = deadline ? new Date(deadline) : null
-      const isBeforeDeadline = deadlineDate ? now < deadlineDate : false
+      
+      // Parse deadline - handle various date formats from database
+      let isBeforeDeadline = false
+      if (deadline) {
+        // Try parsing as ISO string first, then as plain date
+        const deadlineDate = new Date(deadline)
+        const now = new Date()
+        isBeforeDeadline = !isNaN(deadlineDate.getTime()) && now < deadlineDate
+        
+        // Debug logging
+        console.log('Founding member deadline:', deadline)
+        console.log('Parsed deadline:', deadlineDate)
+        console.log('Current time:', now)
+        console.log('Is before deadline:', isBeforeDeadline)
+      }
 
       // Count current founding members
       const { count: foundingCount } = await supabase
@@ -233,10 +245,23 @@ export default function GettingStartedPage() {
 
       // Use monthly prices from system settings (these are the founders rates)
       // Regular prices are used when founding member period ends
-      const monthlyPremium = parseInt(settingsMap.premium_monthly_price || '97')
-      const monthlyVIP = parseInt(settingsMap.vip_monthly_price || '297')
+      const monthlyPremium = parseInt(settingsMap.premium_monthly_price || '29')
+      const monthlyVIP = parseInt(settingsMap.vip_monthly_price || '97')
       const regularPremium = parseInt(settingsMap.premium_regular_price || '97')
       const regularVIP = parseInt(settingsMap.vip_regular_price || '297')
+
+      console.log('Settings fetched:', {
+        premium_monthly_price: settingsMap.premium_monthly_price,
+        vip_monthly_price: settingsMap.vip_monthly_price,
+        premium_regular_price: settingsMap.premium_regular_price,
+        vip_regular_price: settingsMap.vip_regular_price,
+        founding_member_enabled: settingsMap.founding_member_enabled,
+        founding_member_deadline: settingsMap.founding_member_deadline,
+        isEnabled,
+        isBeforeDeadline,
+        hasSpotsRemaining,
+        isFoundingActive
+      })
 
       setPricing({
         premiumPrice: isFoundingActive ? monthlyPremium : regularPremium,
