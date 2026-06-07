@@ -231,13 +231,16 @@ export default function GettingStartedPage() {
 
       const isFoundingActive = isEnabled && isBeforeDeadline && hasSpotsRemaining
 
+      // Use monthly prices from system settings (these are the founders rates)
+      // Regular prices are used when founding member period ends
+      const monthlyPremium = parseInt(settingsMap.premium_monthly_price || '97')
+      const monthlyVIP = parseInt(settingsMap.vip_monthly_price || '297')
+      const regularPremium = parseInt(settingsMap.premium_regular_price || '97')
+      const regularVIP = parseInt(settingsMap.vip_regular_price || '297')
+
       setPricing({
-        premiumPrice: isFoundingActive 
-          ? parseInt(settingsMap.premium_monthly_price || '29')
-          : parseInt(settingsMap.premium_regular_price || '97'),
-        vipPrice: isFoundingActive
-          ? parseInt(settingsMap.vip_monthly_price || '97')
-          : parseInt(settingsMap.vip_regular_price || '497'),
+        premiumPrice: isFoundingActive ? monthlyPremium : regularPremium,
+        vipPrice: isFoundingActive ? monthlyVIP : regularVIP,
         isFoundingMemberActive: isFoundingActive,
         foundingMemberDeadline: deadline || '',
         foundingMemberLimit: limit,
@@ -260,6 +263,29 @@ export default function GettingStartedPage() {
   const progress = Math.round((completedItems.length / checklistItems.length) * 100)
 
   const remainingSpots = pricing.foundingMemberLimit - pricing.foundingMemberCurrent
+  
+  // Get regular prices for strikethrough display
+  const [regularPrices, setRegularPrices] = useState({ premium: 97, vip: 297 })
+  
+  useEffect(() => {
+    const fetchRegularPrices = async () => {
+      const { data: settings } = await supabase
+        .from('system_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['premium_regular_price', 'vip_regular_price'])
+      
+      const settingsMap = settings?.reduce((acc: any, s: any) => {
+        acc[s.setting_key] = s.setting_value
+        return acc
+      }, {}) || {}
+      
+      setRegularPrices({
+        premium: parseInt(settingsMap.premium_regular_price || '97'),
+        vip: parseInt(settingsMap.vip_regular_price || '297')
+      })
+    }
+    fetchRegularPrices()
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -346,7 +372,7 @@ export default function GettingStartedPage() {
                 <p className="text-sm text-blue-700">/month</p>
               </div>
               {pricing.isFoundingMemberActive && (
-                <p className="text-xs text-blue-600 line-through">Regular: $97/month</p>
+                <p className="text-xs text-blue-600 line-through">Regular: ${regularPrices.premium}/month</p>
               )}
               <ul className="text-sm text-blue-800 mt-4 space-y-1 text-left">
                 <li>• 5 photos</li>
@@ -366,7 +392,7 @@ export default function GettingStartedPage() {
                 <p className="text-sm text-purple-700">/month</p>
               </div>
               {pricing.isFoundingMemberActive && (
-                <p className="text-xs text-purple-600 line-through">Regular: $497/month</p>
+                <p className="text-xs text-purple-600 line-through">Regular: ${regularPrices.vip}/month</p>
               )}
               <ul className="text-sm text-purple-800 mt-4 space-y-1 text-left">
                 <li>• 10 photos</li>
