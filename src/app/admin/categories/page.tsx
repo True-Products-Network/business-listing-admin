@@ -316,7 +316,7 @@ export default function CategoriesAdminPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Category Management</h1>
               <p className="text-gray-500 mt-1">
-                {totalCategories} total categories • {totalBusinesses} businesses listed
+                {totalCategories} total categories ({localBusinessCount} Local + {serviceProviderCount} Service)
               </p>
             </div>
             <div className="flex gap-3">
@@ -386,9 +386,9 @@ export default function CategoriesAdminPage() {
                   <Tag className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-emerald-900">{totalBusinesses}</p>
-                  <p className="text-sm text-emerald-700">Total Businesses</p>
-                  <p className="text-xs text-emerald-600">Across all categories</p>
+                  <p className="text-2xl font-bold text-emerald-900">{totalCategories}</p>
+                  <p className="text-sm text-emerald-700">Total Categories</p>
+                  <p className="text-xs text-emerald-600">{localBusinessCount} Local + {serviceProviderCount} Service</p>
                 </div>
               </div>
             </CardContent>
