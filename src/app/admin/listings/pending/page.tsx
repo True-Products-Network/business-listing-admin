@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Building2, MapPin, Phone, Mail, Globe, CheckCircle, XCircle, Eye, Loader2, ArrowLeft, Crown, Zap, Star, Trash2 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Building2, MapPin, Phone, Mail, Globe, CheckCircle, XCircle, Eye, Loader2, ArrowLeft, Crown, Zap, Star, Trash2, Search } from 'lucide-react'
 import Link from 'next/link'
 import { handleListingApprovalForGHL } from '@/lib/ghl'
 
@@ -31,6 +32,8 @@ interface PendingListing {
 
 export default function PendingListingsPage() {
   const [pendingListings, setPendingListings] = useState<PendingListing[]>([])
+  const [filteredListings, setFilteredListings] = useState<PendingListing[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
@@ -87,6 +90,7 @@ export default function PendingListingsPage() {
         })
         
         setPendingListings(sorted)
+        setFilteredListings(sorted)
       }
     } catch (err: any) {
       console.error('Exception:', err)
@@ -94,6 +98,26 @@ export default function PendingListingsPage() {
     }
     setLoading(false)
   }
+
+  // Filter listings based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredListings(pendingListings)
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+    const filtered = pendingListings.filter(listing => {
+      const business = listing.businesses
+      return (
+        business?.business_name.toLowerCase().includes(query) ||
+        business?.email.toLowerCase().includes(query) ||
+        business?.phone?.toLowerCase().includes(query) ||
+        listing.plan_name.toLowerCase().includes(query)
+      )
+    })
+    setFilteredListings(filtered)
+  }, [searchQuery, pendingListings])
 
   const getPlanIcon = (planKey: string) => {
     switch (planKey) {
@@ -223,15 +247,15 @@ export default function PendingListingsPage() {
   }
 
   // Group listings by plan for display
-  const vipListings = pendingListings.filter(l => l.plan_key === 'vip')
-  const premiumListings = pendingListings.filter(l => l.plan_key === 'premium')
-  const freeListings = pendingListings.filter(l => l.plan_key === 'free' || !l.plan_key)
+  const vipListings = filteredListings.filter(l => l.plan_key === 'vip')
+  const premiumListings = filteredListings.filter(l => l.plan_key === 'premium')
+  const freeListings = filteredListings.filter(l => l.plan_key === 'free' || !l.plan_key)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pending Listings</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Pending Listings ({filteredListings.length}{filteredListings.length !== pendingListings.length ? ` of ${pendingListings.length}` : ''})</h1>
           <p className="text-slate-600">Review and approve new business submissions</p>
         </div>
         <Link href="/admin" className="inline-flex">
@@ -241,6 +265,21 @@ export default function PendingListingsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Search Bar */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <Input
+              placeholder="Search by business name, email, phone, or plan..."
+              className="pl-10 h-12"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4">
@@ -279,9 +318,9 @@ export default function PendingListingsPage() {
         </Card>
       </div>
 
-      {pendingListings && pendingListings.length > 0 ? (
+      {filteredListings && filteredListings.length > 0 ? (
         <div className="space-y-4">
-          {pendingListings.map((listing: PendingListing) => {
+          {filteredListings.map((listing: PendingListing) => {
             const business = listing.businesses
 
             return (

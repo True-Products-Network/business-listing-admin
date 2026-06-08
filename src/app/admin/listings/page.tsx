@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Building2, MapPin, CheckCircle, XCircle, Star, Crown, Loader2, Circle, ArrowLeft, Trash2, Edit, Eye, ExternalLink, DollarSign, Tag, Plus, X, Users } from 'lucide-react'
+import { Building2, MapPin, CheckCircle, XCircle, Star, Crown, Loader2, Circle, ArrowLeft, Trash2, Edit, Eye, ExternalLink, DollarSign, Tag, Plus, X, Users, Search } from 'lucide-react'
 import Link from 'next/link'
 import {
   Dialog,
@@ -61,6 +61,8 @@ interface Category {
 
 export default function ApprovedListingsPage() {
   const [listings, setListings] = useState<Listing[]>([])
+  const [filteredListings, setFilteredListings] = useState<Listing[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -249,6 +251,7 @@ export default function ApprovedListingsPage() {
       })
 
       setListings(combined)
+      setFilteredListings(combined)
     } catch (err: any) {
       console.error('Exception fetching listings:', err)
       setError(err.message)
@@ -256,6 +259,23 @@ export default function ApprovedListingsPage() {
       setLoading(false)
     }
   }
+
+  // Filter listings based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredListings(listings)
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+    const filtered = listings.filter(listing =>
+      listing.business_name.toLowerCase().includes(query) ||
+      listing.email.toLowerCase().includes(query) ||
+      listing.city.toLowerCase().includes(query) ||
+      listing.categories?.some(cat => cat.toLowerCase().includes(query))
+    )
+    setFilteredListings(filtered)
+  }, [searchQuery, listings])
 
   const openViewDialog = (listing: Listing) => {
     setSelectedListing(listing)
@@ -608,7 +628,7 @@ export default function ApprovedListingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Approved Listings ({listings.length})</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Approved Listings ({filteredListings.length}{filteredListings.length !== listings.length ? ` of ${listings.length}` : ''})</h1>
           <p className="text-slate-600">Manage all approved business listings</p>
         </div>
         <Link href="/admin" className="inline-flex">
@@ -618,6 +638,21 @@ export default function ApprovedListingsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Search Bar */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <Input
+              placeholder="Search by business name, email, city, or category..."
+              className="pl-10 h-12"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="p-0">
@@ -634,8 +669,8 @@ export default function ApprovedListingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {listings && listings.length > 0 ? (
-                  listings.map((listing: Listing) => {
+                {filteredListings && filteredListings.length > 0 ? (
+                  filteredListings.map((listing: Listing) => {
                     return (
                       <tr key={listing.listing_id} className="border-b border-slate-100 hover:bg-slate-50">
                         <td className="py-3 px-4">
