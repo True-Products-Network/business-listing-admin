@@ -168,15 +168,9 @@ export default function SystemSettingsPage() {
             <div key={category} className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
-                  {(() => {
-                    const config = getCategoryDisplay(category)
-                    return <>{config.icon}</>
-                  })()}
+                  {getCategoryDisplay(category).icon}
                   <h2 className="text-lg font-semibold">
-                    {(() => {
-                      const config = getCategoryDisplay(category)
-                      return <>{config.title} Settings</>
-                    })()}
+                    {getCategoryDisplay(category).title} Settings
                   </h2>
                 </div>
               </div>
