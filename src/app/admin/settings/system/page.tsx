@@ -171,7 +171,7 @@ export default function SystemSettingsPage() {
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
                   {getCategoryIcon(category)}
-                  <h2 className="text-lg font-semibold capitalize">{category} Settings</h2>
+                  <h2 className="text-lg font-semibold">{category.replace(/\b\w/g, l => l.toUpperCase())} Settings</h2>
                 </div>
               </div>
               
