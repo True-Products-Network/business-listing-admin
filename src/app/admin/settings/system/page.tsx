@@ -97,23 +97,19 @@ export default function SystemSettingsPage() {
   }
 
   const getCategoryIcon = (category: string) => {
-    const cat = category?.toLowerCase().trim() || 'general'
-    console.log('Category:', cat)
+    const cat = (category || 'general').toString().toLowerCase().trim()
     
-    if (cat === 'contact' || cat === 'company branding') {
+    if (cat.includes('branding')) {
       return <Building2 className="w-5 h-5" />
     }
-    if (cat === 'branding') {
-      return <Building2 className="w-5 h-5" />
-    }
-    if (cat === 'address' || cat === 'company address') {
+    if (cat.includes('address')) {
       return <MapPin className="w-5 h-5" />
     }
-    if (cat === 'social' || cat === 'social platforms') {
+    if (cat.includes('social')) {
       return <Share2 className="w-5 h-5" />
     }
-    if (cat === 'general' || cat === 'general settings') {
-      return <Globe className="w-5 h-5" />
+    if (cat.includes('contact')) {
+      return <Phone className="w-5 h-5" />
     }
     return <Globe className="w-5 h-5" />
   }
@@ -175,7 +171,7 @@ export default function SystemSettingsPage() {
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
                   {getCategoryIcon(category)}
-                  <h2 className="text-lg font-semibold">{category.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Settings</h2>
+                  <h2 className="text-lg font-semibold capitalize">{category} Settings</h2>
                 </div>
               </div>
               
