@@ -222,6 +222,8 @@ export default function ApprovedListingsPage() {
           .map((bc: any) => bc.categories?.name)
           .filter(Boolean) || []
 
+        console.log('Business data for', biz?.business_name, '- contact_name:', biz?.contact_name)
+
         return {
           listing_id: item.id,
           id: item.business_id,
@@ -284,6 +286,8 @@ export default function ApprovedListingsPage() {
   }
 
   const openEditDialog = async (listing: Listing) => {
+    console.log('Opening edit dialog for listing:', listing)
+    console.log('Contact name from listing:', listing.contact_name)
     setSelectedListing(listing)
     setEditForm({
       business_name: listing.business_name || '',
@@ -326,6 +330,7 @@ export default function ApprovedListingsPage() {
       })
 
       // Update business
+      console.log('Saving contact_name:', editForm.contact_name)
       const { error: bizError } = await supabase
         .from('businesses')
         .update({
@@ -342,7 +347,7 @@ export default function ApprovedListingsPage() {
         console.error('Business update error:', bizError)
         throw bizError
       }
-      console.log('Business updated successfully')
+      console.log('Business updated successfully with contact_name:', editForm.contact_name)
 
       // Update or insert location
       const { data: existingLoc } = await supabase
