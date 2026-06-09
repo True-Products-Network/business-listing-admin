@@ -34,21 +34,25 @@ export async function POST(
     }
 
     // Fetch location data for this business
+    console.log('Fetching location for business:', businessId);
     const { data: locationData, error: locationError } = await serviceClient
       .from('business_locations')
-      .select('city, state')
-      .eq('business_id', businessId)
-      .eq('is_primary', true)
-      .single();
+      .select('city, state, is_primary')
+      .eq('business_id', businessId);
 
-    if (locationError) {
-      console.log('No primary location found for business:', businessId);
-    }
+    console.log('Location query result:', { locationData, locationError });
+
+    // Find primary location or any location
+    const primaryLocation = locationData?.find((loc: any) => loc.is_primary) || locationData?.[0];
+    console.log('Selected location:', primaryLocation);
 
     // Update business status and location
     const businessUpdate: any = { status: 'active' };
-    if (locationData) {
-      businessUpdate.location = `${locationData.city}, ${locationData.state}`;
+    if (primaryLocation?.city && primaryLocation?.state) {
+      businessUpdate.location = `${primaryLocation.city}, ${primaryLocation.state}`;
+      console.log('Setting location to:', businessUpdate.location);
+    } else {
+      console.log('No valid location found');
     }
 
     const { error: businessError } = await serviceClient
