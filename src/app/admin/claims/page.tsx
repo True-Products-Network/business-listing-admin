@@ -165,6 +165,23 @@ export default function AdminClaimsPage() {
             console.error('Ownership transfer failed:', result.error)
             alert(`Claim approved but ownership transfer failed: ${result.error || 'Unknown error'}`)
           } else {
+            // Update the owner's profile with name from claim
+            if (result.newOwnerId && claim.claimant_name) {
+              const { error: profileUpdateError } = await supabase
+                .from('profiles')
+                .update({ 
+                  full_name: claim.claimant_name,
+                  email: claim.claimant_email 
+                })
+                .eq('id', result.newOwnerId)
+              
+              if (profileUpdateError) {
+                console.error('Error updating profile name:', profileUpdateError)
+              } else {
+                console.log('Updated owner profile name to:', claim.claimant_name)
+              }
+            }
+
             // Also update the phone if provided
             if (claim.claimant_phone) {
               const { error: phoneError } = await supabase
