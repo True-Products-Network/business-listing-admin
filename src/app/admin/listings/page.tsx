@@ -483,22 +483,27 @@ export default function ApprovedListingsPage() {
     }
   }
 
-  const handleReject = async (listingId: string) => {
-    if (!listingId) {
-      alert('Error: Listing ID not found')
+  const handleReject = async (listingId: string, businessId: string) => {
+    if (!listingId || !businessId) {
+      alert('Error: Listing ID or Business ID not found')
       return
     }
     
     try {
-      const { error } = await supabase
-        .from('business_listings')
-        .update({ listing_status: 'rejected' })
-        .eq('id', listingId)
+      const response = await fetch(`/api/admin/listings/${listingId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId })
+      })
 
-      if (error) throw error
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to reject listing')
+      }
 
       fetchListings()
-      alert('Listing moved to pending')
+      alert('Listing rejected successfully')
     } catch (err: any) {
       console.error('Error rejecting:', err)
       alert('Error: ' + err.message)
@@ -807,7 +812,7 @@ export default function ApprovedListingsPage() {
                               variant="ghost" 
                               size="sm"
                               className="text-amber-600"
-                              onClick={() => handleReject(listing.listing_id)}
+                              onClick={() => handleReject(listing.listing_id, listing.id)}
                             >
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
