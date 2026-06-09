@@ -102,8 +102,7 @@ export default function SystemSettingsPage() {
     'features': { title: 'Features', icon: <Globe className="w-5 h-5" /> },
     'pricing': { title: 'Pricing', icon: <Globe className="w-5 h-5" /> },
     'system': { title: 'System', icon: <Globe className="w-5 h-5" /> },
-    'company': { title: 'Company Branding', icon: <Building2 className="w-5 h-5" /> },
-    'address': { title: 'Company Address', icon: <MapPin className="w-5 h-5" /> },
+    'company': { title: 'Company Information', icon: <Building2 className="w-5 h-5" /> },
     'social': { title: 'Social Platforms', icon: <Share2 className="w-5 h-5" /> },
     'general': { title: 'General', icon: <Globe className="w-5 h-5" /> }
   }
