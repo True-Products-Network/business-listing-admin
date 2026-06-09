@@ -492,7 +492,7 @@ export default function ApprovedListingsPage() {
     try {
       const { error } = await supabase
         .from('business_listings')
-        .update({ listing_status: 'pending' })
+        .update({ listing_status: 'rejected' })
         .eq('id', listingId)
 
       if (error) throw error
