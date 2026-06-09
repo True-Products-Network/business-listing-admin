@@ -96,19 +96,27 @@ export default function SystemSettingsPage() {
     }
   }
 
+  const formatCategoryTitle = (category: string): string => {
+    if (!category) return 'General'
+    return category
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
+
   const getCategoryIcon = (category: string) => {
-    const cat = (category || 'general').toString().toLowerCase().trim()
+    const cat = (category || 'general').toLowerCase().trim()
     
-    if (cat.includes('branding')) {
+    if (cat.indexOf('branding') !== -1) {
       return <Building2 className="w-5 h-5" />
     }
-    if (cat.includes('address')) {
+    if (cat.indexOf('address') !== -1) {
       return <MapPin className="w-5 h-5" />
     }
-    if (cat.includes('social')) {
+    if (cat.indexOf('social') !== -1) {
       return <Share2 className="w-5 h-5" />
     }
-    if (cat.includes('contact')) {
+    if (cat.indexOf('contact') !== -1) {
       return <Phone className="w-5 h-5" />
     }
     return <Globe className="w-5 h-5" />
@@ -171,7 +179,7 @@ export default function SystemSettingsPage() {
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
                   {getCategoryIcon(category)}
-                  <h2 className="text-lg font-semibold">{category.replace(/\b\w/g, l => l.toUpperCase())} Settings</h2>
+                  <h2 className="text-lg font-semibold">{formatCategoryTitle(category)} Settings</h2>
                 </div>
               </div>
               
