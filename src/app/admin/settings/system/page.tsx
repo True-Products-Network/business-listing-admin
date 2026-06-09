@@ -96,30 +96,21 @@ export default function SystemSettingsPage() {
     }
   }
 
-  const formatCategoryTitle = (category: string): string => {
-    if (!category) return 'General'
-    return category
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
+  const categoryConfig: Record<string, { title: string; icon: React.ReactNode }> = {
+    'contact': { title: 'Support Contact', icon: <Phone className="w-5 h-5" /> },
+    'content': { title: 'Content', icon: <Globe className="w-5 h-5" /> },
+    'features': { title: 'Features', icon: <Globe className="w-5 h-5" /> },
+    'pricing': { title: 'Pricing', icon: <Globe className="w-5 h-5" /> },
+    'system': { title: 'System', icon: <Globe className="w-5 h-5" /> },
+    'company branding': { title: 'Company Branding', icon: <Building2 className="w-5 h-5" /> },
+    'company address': { title: 'Company Address', icon: <MapPin className="w-5 h-5" /> },
+    'social platforms': { title: 'Social Platforms', icon: <Share2 className="w-5 h-5" /> },
+    'general': { title: 'General', icon: <Globe className="w-5 h-5" /> }
   }
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryDisplay = (category: string) => {
     const cat = (category || 'general').toLowerCase().trim()
-    
-    if (cat.indexOf('branding') !== -1) {
-      return <Building2 className="w-5 h-5" />
-    }
-    if (cat.indexOf('address') !== -1) {
-      return <MapPin className="w-5 h-5" />
-    }
-    if (cat.indexOf('social') !== -1) {
-      return <Share2 className="w-5 h-5" />
-    }
-    if (cat.indexOf('contact') !== -1) {
-      return <Phone className="w-5 h-5" />
-    }
-    return <Globe className="w-5 h-5" />
+    return categoryConfig[cat] || { title: cat.charAt(0).toUpperCase() + cat.slice(1), icon: <Globe className="w-5 h-5" /> }
   }
 
   const getSettingIcon = (key: string) => {
@@ -178,8 +169,16 @@ export default function SystemSettingsPage() {
             <div key={category} className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
-                  {getCategoryIcon(category)}
-                  <h2 className="text-lg font-semibold">{formatCategoryTitle(category)} Settings</h2>
+                  {(() => {
+                    const config = getCategoryDisplay(category)
+                    return <>{config.icon}</>
+                  })()}
+                  <h2 className="text-lg font-semibold">
+                    {(() => {
+                      const config = getCategoryDisplay(category)
+                      return <>{config.title} Settings</>
+                    })()}
+                  </h2>
                 </div>
               </div>
               
