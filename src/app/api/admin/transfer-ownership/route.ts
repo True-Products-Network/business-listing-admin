@@ -74,6 +74,27 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
+    // Update the new owner's role to 'business_owner' if they're currently a 'visitor'
+    const { data: currentProfile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', newOwner.id)
+      .single();
+
+    if (!profileError && currentProfile && currentProfile.role === 'visitor') {
+      const { error: roleUpdateError } = await supabaseAdmin
+        .from('profiles')
+        .update({ role: 'business_owner' })
+        .eq('id', newOwner.id);
+
+      if (roleUpdateError) {
+        console.error('Failed to update user role:', roleUpdateError);
+        // Don't fail the request if role update fails, but log it
+      } else {
+        console.log('Updated user role to business_owner:', newOwner.email);
+      }
+    }
+
     // Log the ownership transfer
     const { error: logError } = await supabaseAdmin
       .from('admin_activity_log')
