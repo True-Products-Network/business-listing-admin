@@ -139,7 +139,7 @@ export default function ApprovedListingsPage() {
 
       const { data: businessesData, error: bizError } = await supabase
         .from('businesses')
-        .select('id, business_name, email, phone, description_long, logo_url, website_url, slug, owner_profile_id')
+        .select('id, business_name, email, phone, description_long, logo_url, website_url, slug, owner_profile_id, contact_name')
         .in('id', businessIds)
 
       if (bizError) {
@@ -228,6 +228,7 @@ export default function ApprovedListingsPage() {
           business_name: biz?.business_name || 'Unknown',
           email: biz?.email || '',
           phone: biz?.phone || '',
+          contact_name: biz?.contact_name || '',
           description_long: biz?.description_long || '',
           logo_url: biz?.logo_url || '',
           website_url: biz?.website_url || '',
@@ -333,6 +334,7 @@ export default function ApprovedListingsPage() {
           phone: editForm.phone,
           email: editForm.email,
           website_url: editForm.website_url,
+          contact_name: editForm.contact_name,
         })
         .eq('id', selectedListing.id)
 
@@ -972,6 +974,16 @@ export default function ApprovedListingsPage() {
                   onChange={(e) => setEditForm({...editForm, email: e.target.value})}
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="contact_name" className="text-sm font-medium block mb-2">Contact Name</label>
+              <Input
+                id="contact_name"
+                value={editForm.contact_name}
+                onChange={(e) => setEditForm({...editForm, contact_name: e.target.value})}
+                placeholder="Primary contact person"
+              />
             </div>
 
             <div>
