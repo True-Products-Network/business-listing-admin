@@ -80,6 +80,8 @@ export default function ApprovedListingsPage() {
     phone: '',
     email: '',
     contact_name: '',
+    owner_email: '',
+    owner_name: '',
     address_line_1: '',
     address_line_2: '',
     city: '',
@@ -294,7 +296,9 @@ export default function ApprovedListingsPage() {
       description_long: listing.description_long || '',
       phone: listing.phone || '',
       email: listing.email || '',
-      contact_name: listing.owner_name || '',
+      contact_name: listing.contact_name || '',
+      owner_email: listing.owner_email || '',
+      owner_name: listing.owner_name || '',
       address_line_1: listing.address_line_1 || '',
       address_line_2: listing.address_line_2 || '',
       city: listing.city || '',
@@ -349,16 +353,16 @@ export default function ApprovedListingsPage() {
       }
       console.log('Business updated successfully with contact_name:', editForm.contact_name)
 
-      // Update owner's profile if contact_name or email changed and there's an owner
+      // Update owner's profile if owner_name or owner_email changed and there's an owner
       if (selectedListing.owner_profile_id) {
         const profileUpdates: any = {}
         
-        if (editForm.contact_name !== selectedListing.owner_name) {
-          profileUpdates.full_name = editForm.contact_name
+        if (editForm.owner_name !== selectedListing.owner_name) {
+          profileUpdates.full_name = editForm.owner_name
         }
         
-        if (editForm.email !== selectedListing.email) {
-          profileUpdates.email = editForm.email
+        if (editForm.owner_email !== selectedListing.owner_email) {
+          profileUpdates.email = editForm.owner_email
         }
         
         if (Object.keys(profileUpdates).length > 0) {
@@ -999,24 +1003,54 @@ export default function ApprovedListingsPage() {
                 />
               </div>
               <div>
-                <label htmlFor="email" className="text-sm font-medium block mb-2">Email</label>
+                <label htmlFor="email" className="text-sm font-medium block mb-2">Contact Email</label>
                 <Input
                   id="email"
                   type="email"
                   value={editForm.email}
                   onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                  placeholder="Public contact email"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="contact_name" className="text-sm font-medium block mb-2">Owner/Contact Name</label>
+              <label htmlFor="contact_name" className="text-sm font-medium block mb-2">Contact Name</label>
               <Input
                 id="contact_name"
                 value={editForm.contact_name}
                 onChange={(e) => setEditForm({...editForm, contact_name: e.target.value})}
-                placeholder="Business owner or primary contact"
+                placeholder="Public contact person"
               />
+            </div>
+
+            {/* Owner Section - Admin Only */}
+            <div className="border-t border-slate-200 pt-4 mt-4">
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Owner Details (Admin Only)
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="owner_name" className="text-sm font-medium block mb-2">Owner Name</label>
+                  <Input
+                    id="owner_name"
+                    value={editForm.owner_name}
+                    onChange={(e) => setEditForm({...editForm, owner_name: e.target.value})}
+                    placeholder="Business owner name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="owner_email" className="text-sm font-medium block mb-2">Owner Email</label>
+                  <Input
+                    id="owner_email"
+                    type="email"
+                    value={editForm.owner_email}
+                    onChange={(e) => setEditForm({...editForm, owner_email: e.target.value})}
+                    placeholder="Owner's email"
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
