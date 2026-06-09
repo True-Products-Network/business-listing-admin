@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Phone, Mail, Clock, Globe, Building2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Phone, Mail, Clock, Globe, Building2, Loader2, MapPin, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 
@@ -97,9 +97,11 @@ export default function SystemSettingsPage() {
   }
 
   const getCategoryIcon = (category: string) => {
-    switch (category) {
+    switch (category.toLowerCase()) {
       case 'contact': return <Phone className="w-5 h-5" />
       case 'branding': return <Building2 className="w-5 h-5" />
+      case 'address': return <MapPin className="w-5 h-5" />
+      case 'social': return <Share2 className="w-5 h-5" />
       case 'general': return <Globe className="w-5 h-5" />
       default: return <Globe className="w-5 h-5" />
     }
@@ -162,7 +164,7 @@ export default function SystemSettingsPage() {
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
                   {getCategoryIcon(category)}
-                  <h2 className="text-lg font-semibold capitalize">{category} Settings</h2>
+                  <h2 className="text-lg font-semibold">{category.charAt(0).toUpperCase() + category.slice(1)} Settings</h2>
                 </div>
               </div>
               
