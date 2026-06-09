@@ -107,8 +107,11 @@ export default function SystemSettingsPage() {
     'general': { title: 'General', icon: <Globe className="w-5 h-5" /> }
   }
 
-  const getCategoryDisplay = (category: string) => {
-    const cat = (category || 'general').toLowerCase().trim()
+  const getCategoryDisplay = (category: string | null | undefined) => {
+    if (!category) {
+      return { title: 'General', icon: <Globe className="w-5 h-5" /> }
+    }
+    const cat = category.toLowerCase().trim()
     return categoryConfig[cat] || { title: cat.charAt(0).toUpperCase() + cat.slice(1), icon: <Globe className="w-5 h-5" /> }
   }
 
