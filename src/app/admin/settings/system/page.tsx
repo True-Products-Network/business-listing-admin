@@ -98,11 +98,20 @@ export default function SystemSettingsPage() {
 
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
-      case 'contact': return <Phone className="w-5 h-5" />
-      case 'branding': return <Building2 className="w-5 h-5" />
-      case 'address': return <MapPin className="w-5 h-5" />
-      case 'social': return <Share2 className="w-5 h-5" />
-      case 'general': return <Globe className="w-5 h-5" />
+      case 'contact':
+      case 'company branding':
+        return <Building2 className="w-5 h-5" />
+      case 'branding':
+        return <Building2 className="w-5 h-5" />
+      case 'address':
+      case 'company address':
+        return <MapPin className="w-5 h-5" />
+      case 'social':
+      case 'social platforms':
+        return <Share2 className="w-5 h-5" />
+      case 'general':
+      case 'general settings':
+        return <Globe className="w-5 h-5" />
       default: return <Globe className="w-5 h-5" />
     }
   }
