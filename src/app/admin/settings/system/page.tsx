@@ -96,25 +96,6 @@ export default function SystemSettingsPage() {
     }
   }
 
-  const categoryConfig: Record<string, { title: string; icon: React.ReactNode }> = {
-    'contact': { title: 'Support Contact', icon: <Phone className="w-5 h-5" /> },
-    'content': { title: 'Content', icon: <Globe className="w-5 h-5" /> },
-    'features': { title: 'Features', icon: <Globe className="w-5 h-5" /> },
-    'pricing': { title: 'Pricing', icon: <Globe className="w-5 h-5" /> },
-    'system': { title: 'System', icon: <Globe className="w-5 h-5" /> },
-    'company': { title: 'Company Information', icon: <Building2 className="w-5 h-5" /> },
-    'social': { title: 'Social Platforms', icon: <Share2 className="w-5 h-5" /> },
-    'general': { title: 'General', icon: <Globe className="w-5 h-5" /> }
-  }
-
-  const getCategoryDisplay = (category: string | null | undefined) => {
-    if (!category) {
-      return { title: 'General', icon: <Globe className="w-5 h-5" /> }
-    }
-    const cat = category.toLowerCase().trim()
-    return categoryConfig[cat] || { title: cat.charAt(0).toUpperCase() + cat.slice(1), icon: <Globe className="w-5 h-5" /> }
-  }
-
   const getSettingIcon = (key: string) => {
     if (key.includes('phone')) return <Phone className="w-4 h-4 text-gray-400" />
     if (key.includes('email')) return <Mail className="w-4 h-4 text-gray-400" />
@@ -122,14 +103,6 @@ export default function SystemSettingsPage() {
     if (key.includes('url')) return <Globe className="w-4 h-4 text-gray-400" />
     return null
   }
-
-  // Group settings by category (handle null/undefined categories)
-  const groupedSettings = settings.reduce((acc, setting) => {
-    const category = setting.category || 'general'
-    if (!acc[category]) acc[category] = []
-    acc[category].push(setting)
-    return acc
-  }, {} as Record<string, SystemSetting[]>)
 
   if (loading) {
     return (
@@ -166,51 +139,45 @@ export default function SystemSettingsPage() {
           </div>
         )}
 
-        <div className="space-y-8">
-          {Object.entries(groupedSettings).map(([category, categorySettings]) => (
-            <div key={category} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
-                <div className="flex items-center gap-3 text-white">
-                  {getCategoryDisplay(category).icon}
-                  <h2 className="text-lg font-semibold">
-                    {getCategoryDisplay(category).title} Settings
-                  </h2>
-                </div>
-              </div>
-              
-              <div className="p-6 space-y-6">
-                {categorySettings.map((setting) => (
-                  <div key={setting.setting_key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {setting.description}
-                      {setting.is_public && (
-                        <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                          Public
-                        </span>
-                      )}
-                    </label>
-                    <div className="relative">
-                      {getSettingIcon(setting.setting_key) && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                          {getSettingIcon(setting.setting_key)}
-                        </div>
-                      )}
-                      <input
-                        type="text"
-                        value={editedSettings[setting.setting_key] || ''}
-                        onChange={(e) => handleChange(setting.setting_key, e.target.value)}
-                        className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#54afe6] focus:border-transparent outline-none ${
-                          getSettingIcon(setting.setting_key) ? 'pl-10' : ''
-                        }`}
-                        placeholder={`Enter ${setting.description.toLowerCase()}`}
-                      />
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
+            <h2 className="text-lg font-semibold text-white">All Settings</h2>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            {settings.map((setting) => (
+              <div key={setting.setting_key}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {setting.description}
+                  {setting.is_public && (
+                    <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                      Public
+                    </span>
+                  )}
+                  <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                    {setting.category || 'general'}
+                  </span>
+                </label>
+                <div className="relative">
+                  {getSettingIcon(setting.setting_key) && (
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                      {getSettingIcon(setting.setting_key)}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Key: {setting.setting_key}</p>
-                  </div>
-                ))}
+                  )}
+                  <input
+                    type="text"
+                    value={editedSettings[setting.setting_key] || ''}
+                    onChange={(e) => handleChange(setting.setting_key, e.target.value)}
+                    className={`w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#54afe6] focus:border-transparent outline-none ${
+                      getSettingIcon(setting.setting_key) ? 'pl-10' : ''
+                    }`}
+                    placeholder={`Enter ${setting.description?.toLowerCase() || 'value'}`}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Key: {setting.setting_key}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Save Button */}
