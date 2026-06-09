@@ -569,31 +569,29 @@ export default function ApprovedListingsPage() {
     
     setSaving(true)
     try {
-      // Find user by email
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .eq('email', newOwnerEmail)
-        .single()
-
-      if (userError || !userData) {
-        throw new Error('User not found. They must have an account first.')
-      }
-
-      // Update business ownership (owner is stored in businesses table only)
-      const { error: businessError } = await supabase
-        .from('businesses')
-        .update({
-          owner_profile_id: userData.id,
+      // Call the admin API to transfer ownership
+      // This bypasses the database trigger that prevents ownership changes
+      const response = await fetch('/api/admin/transfer-ownership', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessId: selectedListing.id,
+          newOwnerEmail: newOwnerEmail
         })
-        .eq('id', selectedListing.id)
+      })
 
-      if (businessError) throw businessError
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to transfer ownership')
+      }
 
       setOwnerDialogOpen(false)
       setNewOwnerEmail('')
-      fetchListings()
-      alert(`Ownership transferred to ${userData.full_name || userData.email}`)
+      await fetchListings()
+      alert(`Ownership transferred to ${result.newOwnerName || result.newOwnerEmail}`)
     } catch (err: any) {
       console.error('Error changing owner:', err)
       alert('Error: ' + err.message)
