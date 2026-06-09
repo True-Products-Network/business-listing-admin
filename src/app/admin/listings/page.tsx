@@ -349,19 +349,31 @@ export default function ApprovedListingsPage() {
       }
       console.log('Business updated successfully with contact_name:', editForm.contact_name)
 
-      // Update owner's profile name if contact_name changed and there's an owner
-      if (selectedListing.owner_profile_id && editForm.contact_name !== selectedListing.owner_name) {
-        console.log('Updating owner profile name to:', editForm.contact_name)
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ full_name: editForm.contact_name })
-          .eq('id', selectedListing.owner_profile_id)
+      // Update owner's profile if contact_name or email changed and there's an owner
+      if (selectedListing.owner_profile_id) {
+        const profileUpdates: any = {}
+        
+        if (editForm.contact_name !== selectedListing.owner_name) {
+          profileUpdates.full_name = editForm.contact_name
+        }
+        
+        if (editForm.email !== selectedListing.email) {
+          profileUpdates.email = editForm.email
+        }
+        
+        if (Object.keys(profileUpdates).length > 0) {
+          console.log('Updating owner profile:', profileUpdates)
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update(profileUpdates)
+            .eq('id', selectedListing.owner_profile_id)
 
-        if (profileError) {
-          console.error('Profile update error:', profileError)
-          // Don't throw - the business update succeeded
-        } else {
-          console.log('Owner profile name updated successfully')
+          if (profileError) {
+            console.error('Profile update error:', profileError)
+            // Don't throw - the business update succeeded
+          } else {
+            console.log('Owner profile updated successfully')
+          }
         }
       }
 
