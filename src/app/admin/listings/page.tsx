@@ -287,14 +287,14 @@ export default function ApprovedListingsPage() {
 
   const openEditDialog = async (listing: Listing) => {
     console.log('Opening edit dialog for listing:', listing)
-    console.log('Contact name from listing:', listing.contact_name)
+    console.log('Owner name from listing:', listing.owner_name)
     setSelectedListing(listing)
     setEditForm({
       business_name: listing.business_name || '',
       description_long: listing.description_long || '',
       phone: listing.phone || '',
       email: listing.email || '',
-      contact_name: listing.contact_name || '',
+      contact_name: listing.owner_name || '',
       address_line_1: listing.address_line_1 || '',
       address_line_2: listing.address_line_2 || '',
       city: listing.city || '',
@@ -348,6 +348,22 @@ export default function ApprovedListingsPage() {
         throw bizError
       }
       console.log('Business updated successfully with contact_name:', editForm.contact_name)
+
+      // Update owner's profile name if contact_name changed and there's an owner
+      if (selectedListing.owner_profile_id && editForm.contact_name !== selectedListing.owner_name) {
+        console.log('Updating owner profile name to:', editForm.contact_name)
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ full_name: editForm.contact_name })
+          .eq('id', selectedListing.owner_profile_id)
+
+        if (profileError) {
+          console.error('Profile update error:', profileError)
+          // Don't throw - the business update succeeded
+        } else {
+          console.log('Owner profile name updated successfully')
+        }
+      }
 
       // Update or insert location
       const { data: existingLoc } = await supabase
@@ -982,12 +998,12 @@ export default function ApprovedListingsPage() {
             </div>
 
             <div>
-              <label htmlFor="contact_name" className="text-sm font-medium block mb-2">Contact Name</label>
+              <label htmlFor="contact_name" className="text-sm font-medium block mb-2">Owner/Contact Name</label>
               <Input
                 id="contact_name"
                 value={editForm.contact_name}
                 onChange={(e) => setEditForm({...editForm, contact_name: e.target.value})}
-                placeholder="Primary contact person"
+                placeholder="Business owner or primary contact"
               />
             </div>
 
