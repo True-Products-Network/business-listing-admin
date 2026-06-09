@@ -33,10 +33,27 @@ export async function POST(
       );
     }
 
-    // Update business status
+    // Fetch location data for this business
+    const { data: locationData, error: locationError } = await serviceClient
+      .from('business_locations')
+      .select('city, state')
+      .eq('business_id', businessId)
+      .eq('is_primary', true)
+      .single();
+
+    if (locationError) {
+      console.log('No primary location found for business:', businessId);
+    }
+
+    // Update business status and location
+    const businessUpdate: any = { status: 'active' };
+    if (locationData) {
+      businessUpdate.location = `${locationData.city}, ${locationData.state}`;
+    }
+
     const { error: businessError } = await serviceClient
       .from('businesses')
-      .update({ status: 'active' })
+      .update(businessUpdate)
       .eq('id', businessId);
 
     if (businessError) {
