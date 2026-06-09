@@ -16,7 +16,9 @@ import {
   TrendingUp,
   ArrowLeft,
   Globe,
-  Menu
+  Menu,
+  Building2,
+  Share2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -63,6 +65,9 @@ const categoryIcons: Record<string, any> = {
   features: ToggleRight,
   content: FileText,
   contact: Users,
+  company: Building2,
+  social: Share2,
+  general: Globe,
 };
 
 const categoryLabels: Record<string, string> = {
@@ -71,6 +76,9 @@ const categoryLabels: Record<string, string> = {
   features: 'Feature Toggles',
   content: 'Content & Messaging',
   contact: 'Support Contact',
+  company: 'Company Information',
+  social: 'Social Platforms',
+  general: 'General Settings',
 };
 
 export default function AdminSettingsPage() {
