@@ -97,23 +97,25 @@ export default function SystemSettingsPage() {
   }
 
   const getCategoryIcon = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'contact':
-      case 'company branding':
-        return <Building2 className="w-5 h-5" />
-      case 'branding':
-        return <Building2 className="w-5 h-5" />
-      case 'address':
-      case 'company address':
-        return <MapPin className="w-5 h-5" />
-      case 'social':
-      case 'social platforms':
-        return <Share2 className="w-5 h-5" />
-      case 'general':
-      case 'general settings':
-        return <Globe className="w-5 h-5" />
-      default: return <Globe className="w-5 h-5" />
+    const cat = category?.toLowerCase().trim() || 'general'
+    console.log('Category:', cat)
+    
+    if (cat === 'contact' || cat === 'company branding') {
+      return <Building2 className="w-5 h-5" />
     }
+    if (cat === 'branding') {
+      return <Building2 className="w-5 h-5" />
+    }
+    if (cat === 'address' || cat === 'company address') {
+      return <MapPin className="w-5 h-5" />
+    }
+    if (cat === 'social' || cat === 'social platforms') {
+      return <Share2 className="w-5 h-5" />
+    }
+    if (cat === 'general' || cat === 'general settings') {
+      return <Globe className="w-5 h-5" />
+    }
+    return <Globe className="w-5 h-5" />
   }
 
   const getSettingIcon = (key: string) => {
@@ -173,7 +175,7 @@ export default function SystemSettingsPage() {
               <div className="bg-gradient-to-r from-[#371a5b] to-[#bb7ce4] px-6 py-4">
                 <div className="flex items-center gap-3 text-white">
                   {getCategoryIcon(category)}
-                  <h2 className="text-lg font-semibold">{category.charAt(0).toUpperCase() + category.slice(1)} Settings</h2>
+                  <h2 className="text-lg font-semibold">{category.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Settings</h2>
                 </div>
               </div>
               
